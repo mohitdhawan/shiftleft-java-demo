@@ -1,4 +1,6 @@
 # HelloShiftLeft
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmohitdhawan%2Fshiftleft-java-demo.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmohitdhawan%2Fshiftleft-java-demo?ref=badge_shield)
+
 
 This is a demo application which provides a real world representation of a REST service that uses a mix of convention and configuration to simulate a decent set of vulnerabilities exposed in the code. It includes scenarios such as sensitive data leaking to logs, data secrets leaks, authentication bypass, remote code execution, XSS vulnerabilites etc. The sample sensitive data is a mix of financial data such as account information, medical data of patients, and other PII data such as customer information. HelloShiftLeft also contains patterns/anti-patterns of how data is used/abused in interfaces or channels (to and from HTTP/TCP, third-party, database) that can lead to vulnerabilites. The application is built on the Spring Framework and exposes a series of endpoints and APIs for queries and simulating exploits.
 
@@ -67,3 +69,7 @@ A reflected XSS vulnerability exists in the application and can be triggered usi
 [http://localhost:8081/debug?customerId=1&clientId=1&firstName=a&lastName=b&dateOfBirth=123&ssn=123&socialSecurityNum=1&tin=123&phoneNumber=5432<scriscriptpt>alert(1)</sscriptcript>](http://localhost:8081/debug?customerId=1&clientId=1&firstName=a&lastName=b&dateOfBirth=123&ssn=123&socialSecurityNum=1&tin=123&phoneNumber=5432<scriscriptpt>alert(1)</sscriptcript>)
 
 It raises and alert dialogue and returns the Customer object data.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmohitdhawan%2Fshiftleft-java-demo.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmohitdhawan%2Fshiftleft-java-demo?ref=badge_large)
