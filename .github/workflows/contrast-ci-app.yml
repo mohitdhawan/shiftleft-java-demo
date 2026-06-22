@@ -1,0 +1,126 @@
+# DISCLAIMER: This workflow file has been auto-generated and committed to the repo by the GitHub App from Contrast Security.
+# Manual edits to this file could cause the integration to produce unexpected behavior or break the integration.
+# Version: 1.0.1
+# Last updated: 2026-06-22T21:03:11.143746619Z
+name: Contrast CI
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *' # <-- 6:00 UTC (2:00 AM EST / 11:00 PM PST)
+  pull_request:
+    types:
+      - closed
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  # --- Authenticating if using an LLM from AWS Bedrock ---
+  # Option A: Configure AWS Credentials using IAM (Recommended for production)
+  # You must uncomment the `aws_region` and `use_aws_creds_action` lines below in the action inputs
+  # You must configure an organization or repo variable with a valid AWS_REGION
+  #aws-login:
+    #name: Configure AWS Credentials
+    #runs-on: ubuntu-latest
+    #steps:
+      #- name: Configure AWS Credentials
+        #id: aws-credentials
+        #uses: aws-actions/configure-aws-credentials@v5
+        #with:
+          #aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          #aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          #aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          #aws-region: ${{ vars.AWS_REGION }}
+          #role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+    # Option B: Use Bedrock API Keys (Simpler but less secure)
+    # If using API keys, omit the "Configure AWS Credentials" step above
+    # You must configure an organization or repo variable with a valid AWS_REGION
+    # You must uncomment the aws_region lines below in the action inputs
+    # and set AWS_BEARER_TOKEN_BEDROCK organization secret with bedrock API key.
+  call-contrast-orchestrator:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    name: Contrast CI
+    uses: Contrast-Security-OSS/contrast-ci/.github/workflows/contrast-orchestrator.yml@main
+    with:
+      # -------------------------------------------------------
+      # CONTRAST PLATFORM CONFIG (set by Contrast GitHub App at onboard)
+      # -------------------------------------------------------
+      api_host:                   ${{ vars.CONTRAST_CI_API_HOST }}
+      contrast_org_id:            ${{ vars.CONTRAST_CI_ORG_ID }}
+
+      # -------------------------------------------------------
+      # REPO CONTEXT (auto-populated, do not edit)
+      # -------------------------------------------------------
+      base_branch: ${{ github.event.repository.default_branch }}
+      repo_url:    ${{ github.server_url }}
+      repo_name:   ${{ github.repository }}
+
+      # -------------------------------------------------------
+      # RUNNER (optional override)
+      # Configure GitHub org level or repo level env var to set this value without editing the workflow file.
+      # -------------------------------------------------------
+      github_runner: ${{ vars.CONTRAST_CI_GITHUB_RUNNER || 'ubuntu-latest' }}
+
+      # -------------------------------------------------------
+      # SmartFix Config (manual optional overrides)
+      # Configure GitHub org level or repo level env vars to set these values without editing the workflow file.
+      # -------------------------------------------------------
+      max_open_prs: ${{ vars.CONTRAST_CI_MAX_PRS || '5' }}
+      enable_full_telemetry: ${{ vars.CONTRAST_CI_ENABLE_FULL_TELEMETRY || 'true' }}
+      debug_mode: ${{ vars.CONTRAST_CI_DEBUG_MODE || 'false' }}
+      # Coding Agent Options: 'SMARTFIX', 'GITHUB_COPILOT', 'CLAUDE_CODE' see SmartFix docs for details on differences and requirements for each agent.
+      coding_agent: ${{ vars.CONTRAST_CI_CODING_AGENT || 'SMARTFIX' }}
+      #contrast_app_id: ${{ vars.CONTRAST_APP_ID  }}
+      #build_command: ${{ vars.BUILD_COMMAND || '' }}
+      #formatting_command: ${{ vars.FORMATTING_COMMAND || '' }}
+
+      # -------------------------------------------------------
+      # Contrast Code Config (manual optional overrides)
+      # Configure GitHub org level or repo level env var to extend or shorten the default triage duration of 10 minutes
+      # -------------------------------------------------------
+      triage_duration: ${{ vars.CONTRAST_CI_TRIAGE_DURATION || '10m' }}
+
+      # -------------------------------------------------------
+      # LLM CONFIG
+      # Defaults to Contrast-hosted LLM.
+      # Configure CONTRAST_CI_USE_CONTRAST_LLM GitHub org level or repo level env var to false if you are using your own LLM provider.
+      # -------------------------------------------------------
+      use_contrast_llm: ${{ vars.CONTRAST_CI_USE_CONTRAST_LLM || 'true' }}
+
+      # Uncomment below and set GitHub org level or repo level env var to use your own LLM provider.
+      #agent_model:      ${{ vars.AGENT_MODEL }} # e.g. 'bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0'
+      #azure_api_base:   ${{ vars.CONTRAST_CI_AZURE_API_BASE || '' }}
+      #azure_api_version: ${{ vars.CONTRAST_CI_AZURE_API_VERSION || '' }}
+
+      # When using the aws-actions/configure-aws-credentials action uncomment use_aws_creds_action and aws_region
+      # Configure GitHub org level or repo level env vars to set these values
+      #use_aws_creds_action: ${{ vars.CONTRAST_CI_USE_AWS_CREDS_ACTION || 'true' }}
+      #aws_region:       ${{ vars.AWS_REGION || '' }}
+
+    secrets:
+      # -------------------------------------------------------
+      # REQUIRED (Contrast values set by Contrast GitHub App at onboard)
+      # -------------------------------------------------------
+      CONTRAST_API_KEY:           ${{ secrets.CONTRAST_CI_API_KEY }}
+      CONTRAST_AUTHORIZATION:     ${{ secrets.CONTRAST_CI_AUTHORIZATION }}
+      GH_TOKEN:                   ${{ secrets.GITHUB_TOKEN }}
+
+      # -------------------------------------------------------
+      # OPTIONAL — BYOLLM
+      # If using your own LLM provider, set the relevant API keys in your
+      # GitHub organization level or repo level secrets.
+      # -------------------------------------------------------
+      ANTHROPIC_API_KEY:        ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY:           ${{ secrets.GEMINI_API_KEY }}
+      AZURE_API_KEY:            ${{ secrets.AZURE_API_KEY }}
+      AWS_BEARER_TOKEN_BEDROCK: ${{ secrets.AWS_BEARER_TOKEN_BEDROCK }}
+      AWS_ROLE_TO_ASSUME:       ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_ACCESS_KEY_ID:        ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY:    ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN:        ${{ secrets.AWS_SESSION_TOKEN }}
